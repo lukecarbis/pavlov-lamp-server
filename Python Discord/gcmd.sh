@@ -22,9 +22,9 @@ then
     # Get the results and echo back.
     if [ "$?" -eq "0" ]
     then
-        echo "I was able to $vm_power $vm_name successfully." 
+        echo "I was able to $vm_power $vm_name successfully... Not that anyone cares." 
     else
-        echo "hmmm! Sorry I wasn't able to $vm_power $vm_name." 
+        echo "hmmm! Sorry I wasn't able to $vm_power $vm_name. This will all end in tears I just know it." 
     fi
 fi
 

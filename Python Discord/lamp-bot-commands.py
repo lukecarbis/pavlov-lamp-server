@@ -31,21 +31,7 @@ async def on_ready():
 
     response = random.choice(helloQuote)
     await channel.send(response)
-    #await ctx.send('Sorry had to take a nap! But I\'m back now!')
 
-@bot.command(name='99', help='Responds with a random quote from Brooklyn 99')
-async def nine_nine(ctx):
-    brooklyn_99_quotes = [
-        'I\'m the human form of the 💯 emoji.',
-        'Bingpot!',
-        (
-            'Cool. Cool cool cool cool cool cool cool, '
-            'no doubt no doubt no doubt no doubt.'
-        ),
-    ]
-
-    response = random.choice(brooklyn_99_quotes)
-    await ctx.send(response)
 
 @bot.command(name='vm', help='Will send boot cmd to [VM_Name], ie: !vm <start|stop> <name of vm>')
 @commands.has_role('Bot-Commands')
@@ -63,15 +49,15 @@ async def start_vm(ctx, vm_power, vm_name,):
     cmd = 'sh gcmd.sh -m ' + vm_name + " -p " + vm_power +" > tmp"
 
     # run cmd
-    p_CMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    (output, err) = p_CMD.communicate()
+    pCMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    (output, err) = pCMD.communicate()
 
     # read output tmp file
     with open("./tmp", "r") as file:
         data = file.read().replace('\n', '')
     
     # wait for cmd to finish running
-    cmd_status = p_CMD.wait()
+    cmd_status = pCMD.wait()
     
     # send results to discord.
     await ctx.send(data)
@@ -79,6 +65,8 @@ async def start_vm(ctx, vm_power, vm_name,):
     print('Command output: ', output)
     print('Command exit status/return code : ', cmd_status)
 
+    # if it was successful at running start cmd run back ground task
+    # this will check if the server is still running and let us know.
     if data.find('start') > 0:
         bot.loop.create_task(checkServerStatus(vm_name))
 
@@ -93,15 +81,15 @@ async def status_vm(ctx):
     cmd = 'sh gcmd.sh -s t'
 
     # run cmd
-    p_CMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    (output, err) = p_CMD.communicate()
+    pCMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    (output, err) = pCMD.communicate()
 
     # read output tmp file
     with open("./tmp_status", "r") as file:
         data = file.read()#.replace('\n', '')
     
     # wait for cmd to finish running
-    cmd_status = p_CMD.wait()
+    cmd_status = pCMD.wait()
 
     # send results to discord.
     await ctx.send("`"+ data +"`")
@@ -125,8 +113,8 @@ async def checkServerStatus(vmName):
         cmd = 'sh gcmd.sh -s t'
 
         # run cmd
-        p_CMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        (output, err) = p_CMD.communicate()
+        pCMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        (output, err) = pCMD.communicate()
 
         #Create a list
         data = []
@@ -143,13 +131,13 @@ async def checkServerStatus(vmName):
             # If VM name found check status
             if vmName in data[i]:
                 if 'RUNNING' in data[i]:
-                    await channel.send('Hey, '+ vmName + ' has been running for ' + str(counter) + ' hrs.')
+                    await channel.send('Hey, '+ vmName + ' has been running for ' + str(counter) + ' hrs.\nWhy do I even bother?')
                 if 'TERMINATED' in data[i]:
                     keepChecking = False
             i += 1
               
         # wait for cmd to finish running
-        cmd_status = p_CMD.wait()
+        cmd_status = pCMD.wait()
         
 @bot.event
 async def on_command_error(ctx, error):
