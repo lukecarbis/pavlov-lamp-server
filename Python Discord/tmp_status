@@ -1,0 +1,3 @@
+NAME         ZONE                    MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP  STATUS
+lamp-rcon-1  us-west1-b              e2-micro                   10.138.0.2                TERMINATED
+lamp-2       australia-southeast1-b  n1-highcpu-4               10.152.0.3                TERMINATED
