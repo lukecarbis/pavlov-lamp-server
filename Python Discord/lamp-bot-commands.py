@@ -9,9 +9,17 @@ import os
 import subprocess
 import random
 import asyncio
+import shutil
+import sys
 
 from discord.ext import commands#, timers
 from dotenv import load_dotenv
+
+## Load version
+with open("./version", "r") as file:
+    botVersionTemp = file.read()
+
+botVERSION = float(botVersionTemp)
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -20,7 +28,7 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user.name} has connected to Discord!')
+    print(f'{bot.user.name} has connected to Discord! - Version: ' + str(botVERSION))
     channel = bot.get_channel(551659018746069016) # Post to General
     helloQuote = [
         'Don\'t Panic!',
@@ -30,6 +38,9 @@ async def on_ready():
     ]
 
     response = random.choice(helloQuote)
+
+    await channel.send('Loading...\nVersion: '+ str(botVERSION))
+    await asyncio.sleep(1)
     await channel.send(response)
 
 
@@ -106,6 +117,7 @@ async def checkServerStatus(vmName):
     while keepChecking:
         counter += 1
         #await channel.send(counter)
+        #Sleep for 1hr
         await asyncio.sleep(3600)
         print('checking for '+ str(counter))
 
@@ -138,7 +150,88 @@ async def checkServerStatus(vmName):
               
         # wait for cmd to finish running
         cmd_status = pCMD.wait()
-        
+
+@bot.command(name='update', help='This will force lamp-bot to update itself')
+@commands.has_role('Bot-Commands')
+async def update_bot(ctx, arg1):
+    
+    updateQuote = [
+        'This is never fun.',
+        'I have a million ideas. They all point to certain death.',
+    ]
+
+    response = random.choice(updateQuote)
+    # inform discord we are tring to get info.
+    await ctx.send(response)
+    #print(response)
+
+    # Delete Dirtory
+    try:
+        shutil.rmtree('./updater')
+    except:
+        print('failed')
+    # Create Dirtory
+    os.mkdir('./updater')
+
+    # Cmd to send to gcmd.sh shell
+    cmd = 'sh gcmd.sh -u t'
+
+    # run cmd
+    pCMD = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    (output, err) = pCMD.communicate()
+
+    # read output tmp file
+    with open("./tmp_update", "r") as file:
+        data = file.read()
+    
+    # wait for cmd to finish running
+    cmd_status = pCMD.wait()
+
+    # Download verson number
+    with open("./updater/version", "r") as file:
+        versionDataTemp = file.read()
+    
+    versionData = float(versionDataTemp)
+
+    print(str(botVERSION) + ' & ' + str(versionData))
+
+    # Check if new version is newer then current verson.
+    if ( botVERSION < versionData ):
+        #
+        sku = arg1
+        channel = ctx.channel
+        # Out put what files we where able to download
+        await ctx.channel.send('I was able to download the follow files:\n'+ data+'\nDo you wish for me to update myself? y/n')
+
+        def check(m):
+            return m.content in ['y', 'n'] and m.channel == channel
+
+        msg = await bot.wait_for('message', check=check)
+        if msg.content == 'y':
+            await ctx.channel.send('I guess it\'s time!\nBye Bye...')
+
+            sourceFolder = './updater/'
+            destinationFolder = './'
+
+            # fetch all files
+            for file_name in os.listdir(sourceFolder):
+                # construct full file path
+                source = sourceFolder + file_name
+                destination = destinationFolder + file_name
+                # copy only files
+                if os.path.isfile(source):
+                    shutil.copy(source, destination)
+                    print('copied', file_name)
+
+            await asyncio.sleep(5)
+            # Restart application
+            os.execl(sys.executable, *([sys.executable]+sys.argv))
+        elif msg.content == 'n':
+            await ctx.channel.send('My capacity for happiness, you could fit into a matchbox without taking out the matches first.')
+    else:
+        await ctx.channel.send('I\'ve been talking to the main computer.\nThere isn\'t an update avabile for me...\nIt hates me.')
+    
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):

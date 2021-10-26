@@ -2,12 +2,14 @@
 # This script needs to have gcloud installed in order for it to send comands to GCP
 # https://cloud.google.com/sdk/docs/install
 # Get arguments 
-while getopts m:p:s:c: flag
+# Verson 1
+while getopts m:p:s:u: flag
 do
     case "${flag}" in
         m) vm_name=${OPTARG};; # Getting the VM name in GCP
         p) vm_power=${OPTARG};; # Starting or stopping VM in GCP
         s) vm_status=${OPTARG};; # Checking the status of the VM
+        u) bot_update=${OPTARG};; # Download updates from gcloud
         #c) vm_cost=${OPTARG};; # Getting the cost of GCP
     esac
 done
@@ -33,4 +35,13 @@ if [ -n "$vm_status" ];
 then
     # output the list to a temp file
     gcloud compute instances list > ./tmp_status
+fi
+echo $bot_update
+# Download files from gcloud
+if [ -n "$bot_update" ];
+then
+    # Download the files needed.
+    gsutil cp gs://lamp-bot-prod/* ./updater
+    # listed the downloaded files
+    ls ./updater > ./tmp_update
 fi
