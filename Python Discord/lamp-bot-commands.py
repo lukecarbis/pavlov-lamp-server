@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 ## Load version
 with open("./version", "r") as file:
     botVersionTemp = file.read()
+file.close()
 
 botVERSION = float(botVersionTemp)
 
@@ -66,6 +67,7 @@ async def start_vm(ctx, vm_power, vm_name,):
     # read output tmp file
     with open("./tmp", "r") as file:
         data = file.read().replace('\n', '')
+    file.close()
     
     # wait for cmd to finish running
     cmd_status = pCMD.wait()
@@ -98,6 +100,7 @@ async def status_vm(ctx):
     # read output tmp file
     with open("./tmp_status", "r") as file:
         data = file.read()#.replace('\n', '')
+    file.close()
     
     # wait for cmd to finish running
     cmd_status = pCMD.wait()
@@ -134,6 +137,7 @@ async def checkServerStatus(vmName):
         with open("./tmp_status", "r") as file:
             #add each line to the list
             data = file.readlines()
+        file.close()
 
         # Loop through list looking for vmName      
         i = 0
@@ -183,6 +187,7 @@ async def update_bot(ctx, arg1):
     # read output tmp file
     with open("./tmp_update", "r") as file:
         data = file.read()
+    file.close()
     
     # wait for cmd to finish running
     cmd_status = pCMD.wait()
@@ -190,10 +195,11 @@ async def update_bot(ctx, arg1):
     # Download verson number
     with open("./updater/version", "r") as file:
         versionDataTemp = file.read()
+    file.close()
     
     versionData = float(versionDataTemp)
 
-    print(str(botVERSION) + ' & ' + str(versionData))
+    #print(str(botVERSION) + ' & ' + str(versionData))
 
     # Check if new version is newer then current verson.
     if ( botVERSION < versionData ):
@@ -214,14 +220,14 @@ async def update_bot(ctx, arg1):
             destinationFolder = './'
 
             # fetch all files
-            for file_name in os.listdir(sourceFolder):
+            for fileName in os.listdir(sourceFolder):
                 # construct full file path
-                source = sourceFolder + file_name
-                destination = destinationFolder + file_name
+                source = sourceFolder + fileName
+                destination = destinationFolder + fileName
                 # copy only files
                 if os.path.isfile(source):
                     shutil.copy(source, destination)
-                    print('copied', file_name)
+                    print('copied', fileName)
 
             await asyncio.sleep(5)
             # Restart application
