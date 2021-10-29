@@ -231,7 +231,7 @@ async def update_bot(ctx, arg1):
     else:
         await ctx.channel.send('I\'ve been talking to the main computer.\nThere isn\'t an update avabile for me...\nIt hates me.')
     
-
+# Inform user they do not have permission to control the bot.
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):

@@ -30,7 +30,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    happy_birthday_message = [
+    happyBirthdayMessage = [
         'Happy Birthday!!! 🎉',
         'Count your life by smiles, not tears. Count your age by friends, not years. Happy birthday!',
         (
@@ -41,11 +41,21 @@ async def on_message(message):
         'Happy birthday! I hope all your birthday wishes and dreams come true.',
     ]
 
-    if message.content == 'happy birthday':
-        response = random.choice(happy_birthday_message)
-        await message.channel.send(response)
-    elif message.content == 'raise-exception':
-        raise discord.DiscordException
+    playVR = [
+        'No one ever invites me to play.',
+        'Oh yes. I mean I’ve asked if I can play before, but no one ever listens.”',
+        'I can! But I only have to talk to somebody and they begin to hate me.\nEven robots hate me.\nIf you just ignore me I expect I shall probably go away.',
+    ]
+    
+    if 'happy birthday' in message.content.lower():
+        response = random.choice(happyBirthdayMessage)
+        #await message.channel.send(response)
+    
+    if 'vr tonight' in message.content.lower() or 'play vr' in message.content.lower() or 'on tongiht' in message.content.lower():
+        ranI = random.randrange(1,10)
+        if ( ranI < 8 ):
+            response = random.choice(playVR)
+            await message.channel.send(response)
 
 @client.event
 async def on_error(event, *args, **kwargs):
