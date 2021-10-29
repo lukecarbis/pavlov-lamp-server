@@ -33,7 +33,7 @@ async def on_ready():
     channel = bot.get_channel(551659018746069016) # Post to General
     helloQuote = [
         'Don\'t Panic!',
-        'I think ou outght to know...\nI\'m feeling very depressed.',
+        'I think you outght to know...\nI\'m feeling very depressed.',
         'This will all end in tears.',
         'Here I am brain the size of a planet.\nWretched, isn\'t it!',
     ]
@@ -231,6 +231,8 @@ async def update_bot(ctx, arg1):
 
             await asyncio.sleep(5)
             # Restart application
+            os.system('chmod +x ./lamp-bot-commands.py')
+            os.system('chmod +x ./gcmd.sh')
             os.execl(sys.executable, *([sys.executable]+sys.argv))
         elif msg.content == 'n':
             await ctx.channel.send('My capacity for happiness, you could fit into a matchbox without taking out the matches first.')

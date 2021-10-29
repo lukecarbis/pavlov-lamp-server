@@ -42,17 +42,19 @@ async def on_member_join(member):
 @client.event
 async def on_message(message):
 
-    if message.content == 'Loading...' and message.author == client.user:
-        # Check for an update
-        with open("./version", "r") as file:
-            versionDataTemp = file.read()
-        file.close()
+    if 'Loading...' in message.content:
+        if message.author == client.user:
+            # Check for an update
+            with open("./version", "r") as file:
+                versionDataTemp = file.read()
+            file.close()
 
-        versionData = float(versionDataTemp)
+            versionData = float(versionDataTemp)
 
-        # Restart application - if version number doesn't match
-        if ( botVERSION < versionData ):
-            os.execl(sys.executable, *([sys.executable]+sys.argv))
+            # Restart application - if version number doesn't match
+            if ( botVERSION < versionData ):
+                # Restart script
+                os.execl(sys.executable, *([sys.executable]+sys.argv))
 
     if message.author == client.user:
         return
