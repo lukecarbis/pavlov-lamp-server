@@ -3,6 +3,7 @@ bot-commands.py
 Pre-Requits:
 pip install -U discord.py
 pip install -U python-dotenv
+pip install async-pavlov
 """
 from asyncio.tasks import ensure_future
 import os
@@ -11,8 +12,10 @@ import random
 import asyncio
 import shutil
 import sys
+import json
 
-from discord.ext import commands#, timers
+from pavlov import PavlovRCON
+from discord.ext import commands
 from dotenv import load_dotenv
 
 ## Load version
@@ -22,10 +25,14 @@ file.close()
 
 botVERSION = float(botVersionTemp)
 
+defaultHost = ""
+defaultPort = 0000
+defaultPW = ""
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='!', case_insensitive=False)
 
 @bot.event
 async def on_ready():
@@ -35,23 +42,81 @@ async def on_ready():
         'Don\'t Panic!',
         'I think you outght to know...\nI\'m feeling very depressed.',
         'This will all end in tears.',
-        'Here I am brain the size of a planet.\nWretched, isn\'t it!',
+        'Here I am brain the size of a planet.\nWretched, isn\'t it!\n🤯',
     ]
 
     response = random.choice(helloQuote)
 
-    await channel.send('Loading...\nVersion: '+ str(botVERSION))
-    await asyncio.sleep(1)
-    await channel.send(response)
+    loadStatus = os.path.exists('loaded-'+ str(botVERSION))
 
+    if loadStatus == False:
+        await channel.send('Loading...\nVersion: '+ str(botVERSION))
+        await asyncio.sleep(1)
+        await channel.send(response)
+        lsf = open('loaded-'+ str(botVERSION), 'x')
+        lsf.close()
 
+###################################
+### Set Default Server
+###################################
+@bot.command(name='setserver', help='!setserver will set the default server, ie: !setserver lamp-2')
+@commands.has_role('Bot-Commands')
+async def rcon_map(ctx, serverName,):
+    # load the server configs
+    ##servers_list = []
+    try:
+        serverFile = open('./'+serverName+'.json')
+        with serverFile as server_conn_json_file:
+            servers_data = json.load(server_conn_json_file)
+        serverFile.close()
+    except FileNotFoundError as exc:
+        await ctx.send('😔 Could not find '+serverName+'.json file.')
+        return
+    except Exception as exc:
+        await ctx.send('🚫 There was a problem reading '+serverName+'.json file! {}: {}'.format(exc.__class__.__name__,exc))
+        return
+    
+    print(servers_data)
+    print("host: ", servers_data["host"])
+
+    global defaultHost
+    global defaultPW
+    global defaultPort
+
+    defaultHost = servers_data["host"]
+    defaultPW = servers_data["password"]
+    defaultPort = int(servers_data["port"])
+
+    await ctx.send('Will send all RCON commands to '+serverName+' by default.')
+    
+###################################
+### Send RCON Command
+###################################
+@bot.command(name='rcon', help='Send RCON command, ie: !rcon')
+@commands.has_role('Bot-Commands')
+async def start_vm(ctx, command,):
+    
+    if not defaultHost:
+        await ctx.send('Please set default server - run: !setserver [Server Name]')
+        return
+
+    #pavlov = PavlovRCON("34.116.78.214", 5267, "pw")
+    pavlov = PavlovRCON(defaultHost, defaultPort, defaultPW)
+    data = await pavlov.send(command)
+
+    await ctx.send(data)
+
+###################################
+### Start VM
+###################################
 @bot.command(name='vm', help='Will send boot cmd to [VM_Name], ie: !vm <start|stop> <name of vm>')
 @commands.has_role('Bot-Commands')
 async def start_vm(ctx, vm_power, vm_name,):
 
     tryQuote = [
         'On it! 👍 attemping to ' + vm_power + ' ' + vm_name + '.',
-        'Here goes nothing... ' + vm_power + 'ing ' + vm_name + '.',
+        'Here goes nothing... ' + vm_power + ' ' + vm_name + '.',
+        '🔌 ' + vm_power + ' ' + vm_name + '.',
     ]
 
     response = random.choice(tryQuote)
@@ -83,12 +148,14 @@ async def start_vm(ctx, vm_power, vm_name,):
     if data.find('start') > 0:
         bot.loop.create_task(checkServerStatus(vm_name))
 
-
+###################################
+### Get Server Status
+###################################
 @bot.command(name='status', help='Will output the status of all server/s: !status')
 @commands.has_role('Bot-Commands')
 async def status_vm(ctx):
 
-    response = 'On it! 👍 getting status on services.'
+    response = 'On it! 📋 getting status on services.'
     await ctx.send(response)
     # Cmd to send to gcmd.sh shell
     cmd = 'sh gcmd.sh -s t'
@@ -155,6 +222,9 @@ async def checkServerStatus(vmName):
         # wait for cmd to finish running
         cmd_status = pCMD.wait()
 
+###################################
+### Update Discord Bot
+###################################
 @bot.command(name='update', help='This will force lamp-bot to update itself')
 @commands.has_role('Bot-Commands')
 async def update_bot(ctx, arg1):
@@ -207,7 +277,7 @@ async def update_bot(ctx, arg1):
         sku = arg1
         channel = ctx.channel
         # Out put what files we where able to download
-        await ctx.channel.send('I was able to download the follow files:\n'+ data+'\nDo you wish for me to update myself? y/n')
+        await ctx.channel.send('I was able to download the follow files:\n'+data+'\nDo you wish for me to update myself? y/n')
 
         def check(m):
             return m.content in ['y', 'n'] and m.channel == channel
