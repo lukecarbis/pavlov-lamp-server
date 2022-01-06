@@ -3,6 +3,7 @@ bot-commands.py
 Pre-Requits:
 pip install -U discord.py
 pip install -U python-dotenv
+pip install async-pavlov
 """
 from asyncio.tasks import ensure_future
 import os
