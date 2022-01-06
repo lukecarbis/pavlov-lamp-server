@@ -15,7 +15,7 @@ import sys
 import json
 
 from pavlov import PavlovRCON
-from discord.ext import commands#, timers
+from discord.ext import commands
 from dotenv import load_dotenv
 
 ## Load version
@@ -103,7 +103,7 @@ async def start_vm(ctx, command,):
     #pavlov = PavlovRCON("34.116.78.214", 5267, "pw")
     pavlov = PavlovRCON(defaultHost, defaultPort, defaultPW)
     data = await pavlov.send(command)
-    print(data)
+
     await ctx.send(data)
 
 ###################################
