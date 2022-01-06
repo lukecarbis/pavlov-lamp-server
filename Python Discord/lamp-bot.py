@@ -72,7 +72,7 @@ async def on_message(message):
 
     playVR = [
         'No one ever invites me to play.',
-        'Oh yes. I mean I’ve asked if I can play before, but no one ever listens.”',
+        'Oh yes. I mean I’ve asked if I can play before, but no one ever listens.',
         'I can! But I only have to talk to somebody and they begin to hate me.\nEven robots hate me.\nIf you just ignore me I expect I shall probably go away.',
     ]
     
